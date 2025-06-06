@@ -4,6 +4,7 @@ const fs = require("fs");
 const pdfParse = require("pdf-parse");
 const DeepSeek = require("../../services/deepseek");
 const { createPrompt } = require("./promp");
+const cvService = require("../../services/cvService");
 
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
@@ -30,10 +31,39 @@ async function getText(request, response) {
     // Limpiar el archivo temporal
     fs.unlinkSync(path);
 
-    response.json({
-      role: "assistant",
-      content: completion.content,
-    });
+    // Intentar parsear y guardar la respuesta de DeepSeek en MongoDB
+    try {
+      // La respuesta de DeepSeek debería venir en formato JSON
+      const cvData = JSON.parse(completion.content);
+
+      // Agregar fecha de carga del CV
+      if (!cvData.informacionAdicional) {
+        cvData.informacionAdicional = {};
+      }
+      cvData.informacionAdicional.fechaCargaCv = new Date();
+      cvData.informacionAdicional.fuenteCV = "PDF Upload";
+
+      // Guardar en MongoDB
+      const savedCV = await cvService.createCV(cvData);
+      console.log("CV guardado en MongoDB:", savedCV._id);
+
+      response.json({
+        role: "assistant",
+        content: completion.content,
+        saved: true,
+        cvId: savedCV._id,
+        message: "CV procesado y guardado exitosamente en la base de datos",
+      });
+    } catch (parseError) {
+      console.error("Error al parsear o guardar el CV:", parseError);
+      // Si hay error al parsear o guardar, aún devolvemos la respuesta original
+      response.json({
+        role: "assistant",
+        content: completion.content,
+        saved: false,
+        error: "No se pudo guardar en la base de datos: " + parseError.message,
+      });
+    }
   } catch (error) {
     console.error("Error al procesar el PDF:", error);
     response.status(500).json({ error: "Error al procesar el archivo PDF" });
