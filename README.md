@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/DeepSeek-AI-FF6B6B?style=for-the-badge" alt="DeepSeek">
 </div>
 <p align="center">
-  <strong>Una API poderosa para procesar CVs en formato PDF utilizando inteligencia artificial</strong>
+  <strong>Una API para procesar CVs en formato PDF utilizando inteligencia artificial</strong>
 </p>
 
 🚀 Características Principales
@@ -107,10 +107,3 @@ POST /files es el endpoint más importante que procesa PDFs y los guarda automá
 Hot reload con Nodemon
 Configuración automática de la base de datos
 Procesamiento asíncrono de archivos
-
-<div align="center">
-  <p>Hecho con ❤️ por [Tu Nombre]</p>
-  <p>
-    <a href="#cv-processor-api">⬆️ Volver arriba</a>
-  </p>
-</div>
