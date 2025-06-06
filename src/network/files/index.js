@@ -21,10 +21,21 @@ async function getText(request, response) {
   try {
     const buffer = fs.readFileSync(path);
     const data = await pdfParse(buffer);
-    response.send(data.text);
+
+    // Enviar el contenido del PDF a DeepSeek para estructurarlo
+    const prompt = `Por favor, estructura y organiza el siguiente contenido de un PDF de un CV(curriculum vitae):\n\n${data.text}`;
+    const completion = await deepseek.sendMessage(prompt);
+
+    // Limpiar el archivo temporal
+    fs.unlinkSync(path);
+
+    response.json({
+      role: "assistant",
+      content: completion.content,
+    });
   } catch (error) {
-    console.error("Error al leer el archivo pdf");
-    response.status(500).send("Error al leer el archivo pdf");
+    console.error("Error al procesar el PDF:", error);
+    response.status(500).json({ error: "Error al procesar el archivo PDF" });
   }
 }
 
