@@ -3,6 +3,7 @@ const multer = require("multer");
 const fs = require("fs");
 const pdfParse = require("pdf-parse");
 const DeepSeek = require("../../services/deepseek");
+const { createPrompt } = require("./promp");
 
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
@@ -23,7 +24,7 @@ async function getText(request, response) {
     const data = await pdfParse(buffer);
 
     // Enviar el contenido del PDF a DeepSeek para estructurarlo
-    const prompt = `Por favor, estructura y organiza el siguiente contenido de un PDF de un CV(curriculum vitae):\n\n${data.text}`;
+    const prompt = createPrompt(data.text);
     const completion = await deepseek.sendMessage(prompt);
 
     // Limpiar el archivo temporal
